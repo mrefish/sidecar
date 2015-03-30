@@ -14,7 +14,7 @@ nimbus.host: "localhost"
 
 - download [Storm](https://storm.apache.org/downloads.html)... eg. 2.11-0.8.2.1 binaries
 
-- clone kstorm repo: [https://github.com/quux00/kstorm]
+- clone kstorm repo: https://github.com/quux00/kstorm
 ... and build it: mvn package
 
 - run Zookeeper, in Kafka dir: `bin/zookeeper-server-start.sh config/zookeeper.properties`

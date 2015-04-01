@@ -4,21 +4,17 @@ organization := "io.medici"
 
 version := "0.0.1"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.10.5"
 val stormVersion = "0.9.3"
-val chillVersion = "0.5.1"
-val bijectionVersion = "0.7.1"
 
 scalacOptions in Test ++= Seq("-Yrangepos")
 
-// Read here for optional dependencies:
-// http://etorreborre.github.io/specs2/guide/org.specs2.guide.Runners.html#Dependencies
+scalacOptions += "-Yresolve-term-conflict:package"
 
 resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
 
 resolvers ++= Seq(
   Classpaths.typesafeReleases,
-  "Hadoop Releases" at "https://repository.cloudera.com/content/repositories/releases/",
   "Cloudera" at "https://repository.cloudera.com/artifactory/public/",
   "Cloudera2" at "http://repository.cloudera.com/cloudera/cloudera-repos/",
   "releases" at "http://oss.sonatype.org/content/repositories/releases",
@@ -28,14 +24,6 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  // "com.twitter" %% "bijection-core" % bijectionVersion,
-  // "com.twitter" %% "bijection-avro" % bijectionVersion,
-  // "com.twitter" %% "chill" % chillVersion,
-  // "com.twitter" %% "chill-avro" % chillVersion,
-  // "com.twitter" %% "chill-bijection" % chillVersion,
-  // The excludes of jms, jmxtools and jmxri are required as per https://issues.apache.org/jira/browse/KAFKA-974.
-  // The exclude of slf4j-simple is because it overlaps with our use of logback with slf4j facade;  without the exclude
-  // we get slf4j warnings and logback's configuration is not picked up.
   "org.apache.kafka" % "kafka_2.10" % "0.8.2.0"
     exclude("javax.jms", "jms")
     exclude("com.sun.jdmk", "jmxtools")
@@ -71,12 +59,10 @@ scalacOptions ++= Seq(
 )
 initialCommands := "import io.medici.sidecar._"
 
-//addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.13.0")
-
 lazy val root = (project in file(".")).
   settings(
     name := "sidecar",
     version := "0.0.1",
     scalaVersion := "2.11.6",
-    mainClass in Compile := Some("io.medici.sidecar.HelloWorldTopology")
+    mainClass in Compile := Some("io.medici.sidecar.topologies.KafkaTopology")
   )

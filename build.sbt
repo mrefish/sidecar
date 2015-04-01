@@ -4,7 +4,7 @@ organization := "io.medici"
 
 version := "0.0.1"
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.11.6"
 val stormVersion = "0.9.3"
 
 scalacOptions in Test ++= Seq("-Yrangepos")
@@ -24,7 +24,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.apache.kafka" % "kafka_2.10" % "0.8.2.0"
+  "org.apache.kafka" % "kafka_2.11" % "0.8.2.1"
     exclude("javax.jms", "jms")
     exclude("com.sun.jdmk", "jmxtools")
     exclude("com.sun.jmx", "jmxri")

@@ -27,7 +27,6 @@ object KafkaTopologyScala {
     val kspout = buildKafkaSentenceSpout()
     val simpleBolt = new SimpleBolt()
     val mapper = new FieldNameBasedTupleToKafkaMapper[String, String]("key", "message")
-
     val bolt = new KafkaBolt().
       withTopicSelector(new DefaultTopicSelector(TOPIC)).
       withTupleToKafkaMapper(mapper)
@@ -53,7 +52,6 @@ object KafkaTopologyScala {
 
   def buildKafkaSentenceSpout(): KafkaSpout = {
     val zkHostPort = "localhost:2181"
-
     val zkRoot = "/acking-kafka-sentence-spout"
     val zkSpoutId = "acking-sentence-spout"
     val zkHosts = new ZkHosts(zkHostPort)

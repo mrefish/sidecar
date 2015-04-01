@@ -51,13 +51,11 @@ public class KafkaTopology {
 
   private static KafkaSpout buildKafkaSentenceSpout() {
     String zkHostPort = "localhost:2181";
-    String topic = TOPIC;
-
     String zkRoot = "/acking-kafka-sentence-spout";
     String zkSpoutId = "acking-sentence-spout";
     ZkHosts zkHosts = new ZkHosts(zkHostPort);
 
-    SpoutConfig spoutCfg = new SpoutConfig(zkHosts, topic, zkRoot, zkSpoutId);
+    SpoutConfig spoutCfg = new SpoutConfig(zkHosts, TOPIC, zkRoot, zkSpoutId);
     KafkaSpout kafkaSpout = new KafkaSpout(spoutCfg);
     return kafkaSpout;
   }

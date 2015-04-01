@@ -21,11 +21,6 @@ public class SimpleBolt extends BaseRichBolt {
   }
 
   @Override
-  public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    declarer.declare(new Fields("key", "message"));
-  }
-
-  @Override
   public void execute(Tuple tuple) {
     Object value = tuple.getValue(0);
     String sentence = null;
@@ -41,7 +36,17 @@ public class SimpleBolt extends BaseRichBolt {
         throw new RuntimeException(e);
       }
     }
-    _collector.emit(tuple, new Values("key", sentence));
+
+    // remove last character and send to kafka
+    if (sentence.length() > 1) {
+      _collector.emit(tuple, new Values("key", sentence.substring(0, sentence.length() -1)));
+    }
+
     _collector.ack(tuple);
+  }
+
+  @Override
+  public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    declarer.declare(new Fields("key", "message"));
   }
 }

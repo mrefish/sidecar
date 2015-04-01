@@ -1,4 +1,4 @@
-package io.medici.sidecar
+package io.medici.sidecar.topologies
 
 import backtype.storm.Config
 import backtype.storm.LocalCluster
@@ -8,6 +8,8 @@ import backtype.storm.generated.Nimbus.Client
 import backtype.storm.topology.TopologyBuilder
 import backtype.storm.utils.NimbusClient
 import backtype.storm.utils.Utils
+import io.medici.sidecar.bolts.HelloWorldBolt
+import io.medici.sidecar.spouts.HelloWorldSpout
 import java.util.Map
 import org.json.simple.JSONValue
 

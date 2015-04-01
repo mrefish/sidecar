@@ -1,4 +1,4 @@
-package io.medici.sidecar
+package io.medici.sidecar.bolts
 
 import backtype.storm.task.OutputCollector
 import backtype.storm.task.TopologyContext

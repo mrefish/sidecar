@@ -3,7 +3,7 @@ package io.medici.sidecar.topologies
 import backtype.storm.Config
 import backtype.storm.StormSubmitter
 import backtype.storm.topology.TopologyBuilder
-import io.medici.sidecar.bolts.SimpleBolt
+import io.medici.sidecar.bolts._
 import java.util.Properties
 import storm.kafka.bolt.KafkaBolt
 import storm.kafka.bolt.selector.DefaultTopicSelector
@@ -41,7 +41,8 @@ object KafkaTopologyScala {
     val builder = new TopologyBuilder()
     builder.setSpout(SENTENCE_SPOUT_ID, kspout, numSpoutExecutors)
     builder.setBolt(SIMPLE_BOLT_ID, simpleBolt).shuffleGrouping(SENTENCE_SPOUT_ID)
-    builder.setBolt("forwardToKafka", bolt, 1).shuffleGrouping(SIMPLE_BOLT_ID)
+    builder.setBolt("httpBolt", new HttpBolt(), 1).shuffleGrouping(SIMPLE_BOLT_ID)
+    builder.setBolt("forwardToKafka", bolt, 1).shuffleGrouping("httpBolt")
 
     // create topology config
     val conf = new Config()

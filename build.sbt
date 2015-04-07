@@ -44,8 +44,14 @@ libraryDependencies ++= Seq(
     exclude("org.slf4j", "slf4j-log4j12"),
   "commons-io" % "commons-io" % "2.4",
   "org.apache.commons" % "commons-pool2" % "2.3",
+  "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
+    exclude("ch.qos.logback", "logback-classic")
+    exclude("org.slf4j", "slf4j-log4j12")
+    exclude("org.slf4j", "slf4j-simple")
+    exclude("log4j", "log4j")
+    exclude("org.slf4j", "log4j-over-slf4j"),
   // Logback with slf4j facade
-  "ch.qos.logback" % "logback-classic" % "1.1.2",
+  //"ch.qos.logback" % "logback-classic" % "1.1.2",
   // Test dependencies
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",
   "org.mockito" % "mockito-all" % "1.9.5" % "test"

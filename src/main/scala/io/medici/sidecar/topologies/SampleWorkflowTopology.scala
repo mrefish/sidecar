@@ -13,32 +13,21 @@ import storm.kafka.SpoutConfig
 import storm.kafka.ZkHosts
 
 
-object SampleWorkflowTopology {
+abstract class WorkflowTopology(fromTopic: String, toTopic: String) {
 
-  val TOPIC = "broker-dealer"
-  val TOPOLOGY_NAME = "bd-topology"
-
-  def main(args: Array[String]):Unit = {
-
-    val mapper = new FieldNameBasedTupleToKafkaMapper[String, String]
-    val kafkaBolt = new KafkaBolt().
-      withTopicSelector(new DefaultTopicSelector(TOPIC)).
+  val _fromTopic = fromTopic
+  val _toTopic = toTopic
+  val mapper = new FieldNameBasedTupleToKafkaMapper[String, String]
+  val kafkaBolt = new KafkaBolt().
+      withTopicSelector(new DefaultTopicSelector(_toTopic)).
       withTupleToKafkaMapper(mapper)
 
-    // make topology
-    val builder = new TopologyBuilder()
-    builder.setSpout("kafka-spout", buildKafkaSentenceSpout(), 1)
-    builder.setBolt("simple-bolt", new SimpleBolt()).shuffleGrouping("kafka-spout")
-    builder.setBolt("wait2Seconds", new Wait2SecondsBolt()).shuffleGrouping("simple-bolt")
-    builder.setBolt("forward-to-Kafka", kafkaBolt, 1).shuffleGrouping("wait2Seconds")
-
-    StormSubmitter.submitTopology(TOPOLOGY_NAME, buildConfig(), builder.createTopology())
-  }
+  def main(args: Array[String]):Unit;
 
   def buildConfig(): Config = {
     // create topology config
     val conf = new Config()
-    // set kafka producer properties.
+    // set kafka producer properties
     val props = new Properties()
     props.put("metadata.broker.list", "localhost:9092")
     props.put("request.required.acks", "1")
@@ -47,16 +36,39 @@ object SampleWorkflowTopology {
     conf
   }
 
-  def buildKafkaSentenceSpout(): KafkaSpout = {
+  def buildKafkaTopicSpout(topic: String): KafkaSpout = {
     val zkHostPort = "localhost:2181"
-    val zkRoot = "/acking-kafka-" + TOPIC + "-spout"
-    val zkSpoutId = "acking-" + TOPIC + "-spout"
+    val zkRoot = "/acking-kafka-" + topic + "-spout"
+    val zkSpoutId = "acking-" + topic + "-spout"
     val zkHosts = new ZkHosts(zkHostPort)
 
-    val spoutCfg = new SpoutConfig(zkHosts, TOPIC, zkRoot, zkSpoutId)
+    val spoutCfg = new SpoutConfig(zkHosts, topic, zkRoot, zkSpoutId)
     val kafkaSpout = new KafkaSpout(spoutCfg)
     kafkaSpout
   }
+
 }
 
+object ChopAndWaitWorkflowTopology extends WorkflowTopology("broker-dealer", "ledger") {
+  def main(args: Array[String]):Unit = {
+    val builder = new TopologyBuilder()
+    builder.setSpout("kafka-spout", buildKafkaTopicSpout(_fromTopic), 1)
+    builder.setBolt("simple-bolt", new SimpleBolt()).shuffleGrouping("kafka-spout")
+    builder.setBolt("wait2Seconds", new Wait2SecondsBolt()).shuffleGrouping("simple-bolt")
+    builder.setBolt("forward-to-Kafka", kafkaBolt, 1).shuffleGrouping("wait2Seconds")
+    StormSubmitter.submitTopology(_toTopic + "-topology", buildConfig(), builder.createTopology())
+  }
 
+}
+
+object IntoMEWorkflowTopology extends WorkflowTopology("ledger", "matching-engine") {
+  def main(args: Array[String]):Unit = {
+    val builder = new TopologyBuilder()
+    builder.setSpout("kafka-spout", buildKafkaTopicSpout(_fromTopic), 1)
+    builder.setBolt("simple-bolt", new SimpleBolt()).shuffleGrouping("kafka-spout")
+    builder.setBolt("forward-to-Kafka", kafkaBolt, 1).shuffleGrouping("simple-bolt")
+
+    StormSubmitter.submitTopology(_toTopic + "-topology", buildConfig(), builder.createTopology())
+  }
+
+}

@@ -20,7 +20,7 @@ class Wait2SecondsBolt extends BaseRichBolt {
   // expecting a tuple with a "message" field, which will be echoed
   @Override
   def execute(tuple: Tuple) {
-    println("inside Wait2SecondsBolt, about to sleep with tuple: " + tuple);
+    println("Inside Wait2SecondsBolt, about to sleep with tuple: " + tuple);
     Utils.sleep(2000);
     _collector.emit(tuple, new Values("key", tuple.getStringByField("message")));
     _collector.ack(tuple);

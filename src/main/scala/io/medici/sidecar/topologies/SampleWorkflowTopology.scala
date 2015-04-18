@@ -49,26 +49,34 @@ abstract class WorkflowTopology(fromTopic: String, toTopic: String) {
 
 }
 
-object ChopAndWaitWorkflowTopology extends WorkflowTopology("broker-dealer", "ledger") {
+object ChopAndWaitWorkflowTopology extends WorkflowTopology("matching-engine", "ledger") {
   def main(args: Array[String]):Unit = {
     val builder = new TopologyBuilder()
     builder.setSpout("kafka-spout", buildKafkaTopicSpout(_fromTopic), 1)
     builder.setBolt("simple-bolt", new SimpleBolt()).shuffleGrouping("kafka-spout")
     builder.setBolt("wait2Seconds", new Wait2SecondsBolt()).shuffleGrouping("simple-bolt")
-    builder.setBolt("forward-to-Kafka", kafkaBolt, 1).shuffleGrouping("wait2Seconds")
-    StormSubmitter.submitTopology(_toTopic + "-topology", buildConfig(), builder.createTopology())
+    builder.setBolt("forward-to-kafka", kafkaBolt, 1).shuffleGrouping("wait2Seconds")
+    StormSubmitter.submitTopology(_fromTopic + "-topology", buildConfig(), builder.createTopology())
   }
-
 }
 
-object IntoMEWorkflowTopology extends WorkflowTopology("ledger", "matching-engine") {
+object FromLedgerWorkflowTopology extends WorkflowTopology("ledger", "broker-dealer") {
   def main(args: Array[String]):Unit = {
     val builder = new TopologyBuilder()
     builder.setSpout("kafka-spout", buildKafkaTopicSpout(_fromTopic), 1)
-    builder.setBolt("simple-bolt", new SimpleBolt()).shuffleGrouping("kafka-spout")
-    builder.setBolt("forward-to-Kafka", kafkaBolt, 1).shuffleGrouping("simple-bolt")
-
-    StormSubmitter.submitTopology(_toTopic + "-topology", buildConfig(), builder.createTopology())
+    builder.setBolt("propagate-bolt", new PropagateOrFailBolt()).shuffleGrouping("kafka-spout")
+    builder.setBolt("forward-to-kafka", kafkaBolt, 1).shuffleGrouping("propagate-bolt")
+    StormSubmitter.submitTopology(_fromTopic + "-topology", buildConfig(), builder.createTopology())
   }
-
 }
+
+object IntoLedgerWorkflowTopology extends WorkflowTopology("broker-dealer", "ledger") {
+  def main(args: Array[String]):Unit = {
+    val builder = new TopologyBuilder()
+    builder.setSpout("kafka-spout", buildKafkaTopicSpout(_fromTopic), 1)
+    builder.setBolt("propagate-bolt", new PropagateOrFailBolt()).shuffleGrouping("kafka-spout")
+    builder.setBolt("forward-to-kafka", kafkaBolt, 1).shuffleGrouping("propagate-bolt")
+    StormSubmitter.submitTopology(_fromTopic + "-topology", buildConfig(), builder.createTopology())
+  }
+}
+
